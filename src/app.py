@@ -19,6 +19,12 @@ def criar_app() -> FastAPI:
     logging.info("-> Adicionando rotas")
     adicionar_rotas(app)
 
+    logging.info("-> Adicionando middlewares")
+    adicionar_middlewares(app)
+
+    logging.info("-> Adicionando eventos")
+    adicionando_eventos(app)
+
     return app
 
 
