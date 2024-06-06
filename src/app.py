@@ -14,6 +14,7 @@ def criar_app() -> FastAPI:
         title="profile-fastapi",
         openapi_url="/v2/api-docs",
         redoc_url=None,
+        openapi_prefix="/api/v1",
     )
 
     logging.info("-> Adicionando rotas")

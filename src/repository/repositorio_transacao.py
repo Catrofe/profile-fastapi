@@ -20,6 +20,7 @@ class TransacaoRepositorio:
             async with session.begin():
                 session.add_all(transacoes_parseadas)
                 await session.commit()
+
         return transacoes_parseadas
 
     async def parsea_para_entidade(self, transacao: TransacaoSimples) -> Transacao:
