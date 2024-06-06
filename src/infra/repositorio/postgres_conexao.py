@@ -2,23 +2,28 @@ import logging
 from typing import Any
 
 from sqlalchemy.ext.asyncio import (
+    AsyncAttrs,
     AsyncEngine,
     async_sessionmaker,
     close_all_sessions,
     create_async_engine,
 )
+from sqlalchemy.orm import DeclarativeBase
 
 from src.infra.config import settings
-from src.infra.repositorio.entity import Base
 
 
 class SingletonMeta(type):
-    _instances = {}
+    _instances = None
 
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:
             cls._instances[cls] = super(SingletonMeta, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
+
+
+class Base(AsyncAttrs, DeclarativeBase):  # type: ignore
+    pass
 
 
 class PostgresConexao(metaclass=SingletonMeta):
@@ -35,11 +40,8 @@ class PostgresConexao(metaclass=SingletonMeta):
             raise
 
         engine: AsyncEngine = create_async_engine(
-            settings.DB_URL, pool_size=5, max_overflow=0, echo=True
+            settings.DB_URL, pool_size=5, max_overflow=0
         )
-        if not engine:
-            logging.warning("Não foi possível criar a engine do postgres.")
-            raise
 
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
