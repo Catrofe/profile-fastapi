@@ -38,6 +38,8 @@ class PostgresConexao(metaclass=SingletonMeta):
             settings.DB_URL, pool_size=5, max_overflow=0, echo=True
         )
         if not engine:
+            logging.warning("Não foi possível criar a engine do postgres.", exc_info=True)
+            raise
             logging.warning("Não foi possível criar a engine do postgres.")
             raise
 
