@@ -1,12 +1,11 @@
+from typing import Optional
+
 from pydantic_settings import BaseSettings
 
 
 class AppConfig(BaseSettings):
-    MONGO_URL: str
-    MONGO_MAX_CONN: int
-    MONGO_MIN_CONN: int
-    LOG_LEVEL: int
-
+    DB_URL: Optional[str] = None
+    LOG_LEVEL: int = 20
     PROFILE: bool = False
 
 

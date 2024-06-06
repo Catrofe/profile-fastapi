@@ -6,30 +6,26 @@ from pyinstrument.renderers.html import HTMLRenderer
 from pyinstrument.renderers.speedscope import SpeedscopeRenderer
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from src.infra.config import settings
+
 
 class ProfileMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: Callable):
-        if app_config.profile:
-            """Profile the current request
-            Taken from https://pyinstrument.readthedocs.io/en/latest/guide.html#profile-a-web-request-in-fastapi
-            with small improvements.
-            """
-            profile_type_to_renderer = {
-                "html": HTMLRenderer,
-                "speedscope": SpeedscopeRenderer,
-            }
+        if not settings.PROFILE or not request.query_params.get("profile", False):
+            return await call_next(request)
 
-            if request.query_params.get("profile", False):
-                profile_type = request.query_params.get("profile_format", "html")
-                with Profiler(interval=0.001, async_mode="enabled") as profiler:
-                    response = await call_next(request)
+        profile_tipo_renderizacao = {
+            "html": HTMLRenderer,
+            "speedscope": SpeedscopeRenderer,
+        }
 
-                profile_type_to_ext = {"html": "html", "speedscope": "speedscope.json"}
-                extension = profile_type_to_ext[profile_type]
-                renderer = profile_type_to_renderer[profile_type]()
-                with open(f"profile.{extension}", "w") as out:
-                    out.write(profiler.output(renderer=renderer))
-                return response
-        return await call_next(request)
+        profile_tipo = request.query_params.get("profile_format", "html")
+        with Profiler(interval=0.001) as profiler:
+            response = await call_next(request)
 
-
+        tipo_extensao = {"html": "html", "speedscope": "speedscope.json"}
+        extension = tipo_extensao[profile_tipo]
+        render = profile_tipo_renderizacao[profile_tipo]()
+        with open(f"profile.{extension}", "w") as out:
+            out.write(profiler.output(renderer=render))
+        return response
