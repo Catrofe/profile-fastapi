@@ -15,7 +15,11 @@ class TransacaoRepositorio:
         transacoes_parseadas: List[Transacao] = [
             await self.parsea_para_entidade(transacao) for transacao in transacoes
         ]
-        session_maker = await self.conexao.busca_session_maker()
+        try:
+            session_maker = await self.conexao.busca_session_maker()
+        except Exception as e:
+            # Handle or log the exception as needed
+            raise e
         async with session_maker() as session:
             async with session.begin():
                 session.add_all(transacoes_parseadas)
